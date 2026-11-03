@@ -647,8 +647,9 @@ function iniciais(n){return (n||'?').split(' ').filter(Boolean).map(function(w){
 function tag(t,c){return t?'<span class="tag '+(c||'')+'">'+esc(t)+'</span>':''}
 function spin(c){return '<div class="load '+(c||'')+'"><div class="spin" role="status" aria-label="Carregando"></div></div>'}
 function msg(t){return '<p style="padding:40px 0;font-size:18px">'+t+'</p>'}
-function path(){var p=location.pathname.replace(/^\/+|\/+$/g,'').toLowerCase();if(!p||p.indexOf('.')>=0)return'inicio';return decodeURIComponent(p).replace(/[^a-z0-9-]/g,'')}
+function path(){var p=location.pathname.replace(/^\/+|\/+$/g,'').toLowerCase();if(!p||p.indexOf('.')>=0)return'inicio';try{return decodeURIComponent(p).replace(/[^a-z0-9-]/g,'')}catch(e){return'inicio'}}
 function go(h){history.pushState(null,'',h==='inicio'?'/':'/'+h);route()}
+window.addEventListener('popstate',route);
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||a.getAttribute('href')==='#')return;e.preventDefault();go(a.getAttribute('href').slice(1))});
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#navExemplo');if(a){e.preventDefault();window.open('/kauanbasile','_blank','noopener,noreferrer')}});
 function route(){
