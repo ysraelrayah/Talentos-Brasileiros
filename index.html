@@ -186,8 +186,9 @@ a.mini{color:inherit}
 .load.s{min-height:140px}
 .spin{width:44px;height:44px;border-radius:50%;border:4px solid #262626;border-top-color:var(--y);animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+body.ath{background:#fff}
 body.ath header{display:none}
-body.ath footer{padding:12px 0}
+body.ath footer{padding:12px 0;background:#fff;color:#000}
 body.ath footer .wrap{justify-content:center}
 body.ath footer .cols-f,body.ath footer .legal{display:none}
 body.ath footer img{height:24px}
@@ -471,7 +472,7 @@ main{flex:1 0 auto}
 footer{flex:none}
 body::before{background:var(--strip,#fff)}
 /* topo da aba do atleta */
-#topo{background:#fff;color:#111}
+#topo{background:#fff;color:#111;border-bottom:1px solid rgba(0,0,0,.08);min-height:36px}
 #topo[hidden]{display:none}
 #topo .in{max-width:1040px;margin:0 auto;padding:0 20px;display:flex;justify-content:flex-end}
 #topo button{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:inherit;font:600 13px/1 inherit;font-family:inherit;padding:10px 0;cursor:pointer}
@@ -865,6 +866,7 @@ function applyTheme(t){
   el.className='wrap profile m-'+mk;
   el.style.cssText='--y:'+y+';--b:'+b+';--ony:'+(lum(y)>.6?'#000':'#fff')+';--onb:'+(lum(b)>.6?'#000':'#fff')+';--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.14)';
   document.body.style.background=bg;
+  $('v-atleta').style.background=bg;
   var tc=hx.test(t.topo)?t.topo:'#ffffff',on=!t.topo_off,tp=$('topo');
   tp.hidden=!on;tp.style.background=tc;tp.style.color=lum(tc)>.6?'#111':'#fff';
   document.body.style.setProperty('--strip',on?tc:bg);
