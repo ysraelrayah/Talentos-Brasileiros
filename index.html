@@ -417,7 +417,7 @@ dialog.app-dialog p{color:#555;margin:0 0 22px}
 .um-h span{font-size:12.5px;color:#777;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
 .um-m a,.um-m button{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;font-size:14.5px;font-weight:600;color:#111;padding:10px 12px;border-radius:9px;cursor:pointer}
 .um-m a:hover,.um-m button:hover{background:#f2f2f2}
-.um-m .um-x{color:#c62828;margin-top:6px;border-top:1px solid #eee;border-radius:0 0 9px 9px}
+ .um-m .um-x{color:#c62828;margin-top:6px;border-top:1px solid #eee;border-radius:0 0 9px 9px}.um-m .um-admin{background:linear-gradient(135deg,#fff4bf,#ffd86b);color:#382500;font-weight:800;box-shadow:inset 0 0 0 1px #e3b93f;margin:3px 0}.um-m .um-admin:hover{background:linear-gradient(135deg,#ffe991,#ffc83d)}.admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.admin-kicker{color:#9a7a20;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.admin-danger{border-color:#6d2929;background:linear-gradient(145deg,#170e0e,#100d0d)}.admin-danger h3{color:#ffb2b2}@media(max-width:700px){.admin-grid{grid-template-columns:1fr}}
 /* editor mais amigável */
 .eh{display:flex;gap:24px;align-items:center;flex-wrap:wrap;background:#0f0f0f;border-color:#333}
 .eh .av{width:104px;height:104px;font-size:38px;border:2px solid #333}
@@ -1080,7 +1080,7 @@ async function refreshNav(){
   um.innerHTML='<button type="button" class="um-b" id="umB" aria-haspopup="menu" aria-expanded="false" aria-label="Minha conta" onclick="toggleUm(event)">'+av+'</button>'
    +'<div class="um-m" id="umM" role="menu" hidden><div class="um-h"><b>'+esc(nm)+'</b><span>'+esc(em)+'</span></div>'
    +(slug?it('#'+slug,'Ver minha aba')+it('#area-do-atleta','Configurar minha aba')+'<button type="button" role="menuitem" onclick="copiarLink(\''+slug+'\')">Copiar link da minha aba</button>':it('#area-do-atleta','Minha conta'))
-   +(adm?it('#painel','Painel do administrador'):'')
+   +(adm?'<button type="button" role="menuitem" class="um-admin" onclick="go(\'painel\');closeUm()"><span aria-hidden="true">♛</span> Painel do administrador</button>':'')
    +it('https://wa.me/'+WA_SUP+'?text='+encodeURIComponent('Olá! Preciso de ajuda com a minha aba.'),'Suporte',' target="_blank" rel="noopener"')
    +'<button type="button" role="menuitem" class="um-x" onclick="sairNav()">Sair</button></div>';
   en.hidden=true;um.hidden=false;
@@ -1151,9 +1151,30 @@ async function renderPainel(){
   var ad=await sb.from('admins').select('user_id').maybeSingle();
   if(!ad.data){el.innerHTML=msg('Esta conta não tem permissão de administrador.')+'<button class="btn o" onclick="sair(\'renderPainel\')">Sair</button>';return}
   var q=await sb.from('athletes').select('slug,nome').order('created_at');
-  el.innerHTML='<div class="row" style="justify-content:space-between"><h2 style="margin:0">Painel do administrador</h2><button class="btn o sm" onclick="sair(\'renderPainel\')">Sair</button></div>'
-   +'<div class="box ed"><h3>Novo atleta</h3><div class="fm"><label>Endereço (ex: joaosilva)<input id="n_slug"></label><label>Nome<input id="n_nome"></label><label>E-mail do atleta ou responsável<input id="n_email" type="email"></label></div><button class="btn y" onclick="criarAtleta()">Criar aba e liberar acesso</button> <span id="pOk" style="margin-left:10px"></span></div>'
-   +'<div class="box ed"><h3>Gerenciar atleta</h3><select id="pSel" onchange="selP()" style="background:#111;border:1px solid #333;border-radius:10px;color:#fff;padding:12px;font:inherit;width:100%"><option value="">Escolha um atleta…</option>'+(q.data||[]).map(function(a){return '<option value="'+esc(a.slug)+'">'+esc(a.nome)+'</option>'}).join('')+'</select><div id="pAcc"></div></div><div id="edBox"></div>';
+  if(q.error){el.innerHTML=msg('Não foi possível carregar os atletas agora.')+'<button class="btn o" onclick="sair(\'renderPainel\')">Sair</button>';return}
+  el.innerHTML='<div class="row" style="justify-content:space-between"><div><span class="admin-kicker">Área restrita</span><h2 style="margin:4px 0 0">Painel do administrador</h2></div><button class="btn o sm" onclick="sair(\'renderPainel\')">Sair</button></div>'
+   +'<div class="admin-grid"><div class="box ed"><h3>Nova aba</h3><p>Cadastre um atleta e libere o primeiro acesso.</p><div class="fm"><label>Endereço (ex: joaosilva)<input id="n_slug"></label><label>Nome<input id="n_nome"></label><label>E-mail do atleta ou responsável<input id="n_email" type="email"></label></div><button class="btn y" onclick="criarAtleta()">Criar aba e liberar acesso</button> <span id="pOk" style="margin-left:10px" role="status"></span></div>'
+   +'<div class="box ed"><h3>Assinatura</h3><p>Escolha por quanto tempo o atleta terá acesso à aba.</p><label>Atleta<select id="subSel" style="background:#111;border:1px solid #333;border-radius:10px;color:#fff;padding:12px;font:inherit;width:100%"><option value="">Escolha um atleta…</option>'+(q.data||[]).map(function(a){return '<option value="'+esc(a.slug)+'" data-name="'+esc(a.nome)+'">'+esc(a.nome)+'</option>'}).join('')+'</select></label><label style="display:block;margin-top:12px">Duração<select id="subYears" style="background:#111;border:1px solid #333;border-radius:10px;color:#fff;padding:12px;font:inherit;width:100%"><option value="1">1 ano</option><option value="2">2 anos</option><option value="3">3 anos</option></select></label><button class="btn y" style="margin-top:14px" onclick="enviarAssinatura()">Enviar assinatura</button><p id="subStatus" role="status"></p></div></div>'
+   +'<div class="box ed"><h3>Gerenciar atleta</h3><select id="pSel" onchange="selP()" style="background:#111;border:1px solid #333;border-radius:10px;color:#fff;padding:12px;font:inherit;width:100%"><option value="">Escolha um atleta…</option>'+(q.data||[]).map(function(a){return '<option value="'+esc(a.slug)+'">'+esc(a.nome)+'</option>'}).join('')+'</select><div id="pAcc"></div></div><div id="edBox"></div>'
+   +'<div class="box admin-danger"><h3>Excluir aba e acessos</h3><p>Remove a aba pública e todos os e-mails liberados para ela. Esta ação não pode ser desfeita.</p><button class="btn o" onclick="excluirAtleta()">Excluir atleta selecionado</button><p id="deleteStatus" role="status"></p></div>';
+}
+async function enviarAssinatura(){
+  var k=$('subSel').value,years=Number($('subYears').value),out=$('subStatus');
+  if(!k){out.textContent='Escolha um atleta antes de enviar a assinatura.';return}
+  var access=await sb.from('athlete_access').select('email').eq('slug',k).limit(1);
+  if(access.error||!access.data||!access.data.length){out.textContent='Esse atleta ainda não tem e-mail liberado.';return}
+  var start=new Date(),end=new Date(start);end.setFullYear(end.getFullYear()+years);
+  var r=await sb.from('athlete_subscriptions').insert({slug:k,email:access.data[0].email.toLowerCase(),starts_at:start.toISOString(),ends_at:end.toISOString()});
+  out.textContent=r.error?'Não foi possível enviar a assinatura. Verifique a configuração do banco.':'Assinatura liberada até '+end.toLocaleDateString('pt-BR')+'.';
+}
+async function excluirAtleta(){
+  var k=$('pSel').value,out=$('deleteStatus');
+  if(!k){out.textContent='Escolha um atleta antes de excluir.';return}
+  if(!confirm('Excluir a aba e todos os acessos de '+k+'? Esta ação não pode ser desfeita.'))return;
+  var a=await sb.from('athlete_access').delete().eq('slug',k);if(a.error){out.textContent='Não foi possível excluir os acessos.';return}
+  await sb.from('athlete_subscriptions').delete().eq('slug',k);
+  var r=await sb.from('athletes').delete().eq('slug',k);if(r.error){out.textContent='Acessos removidos, mas a aba não pôde ser excluída.';return}
+  out.textContent='Aba excluída com sucesso.';await renderPainel();loadLista();
 }
 async function selP(){
   var k=$('pSel').value;
