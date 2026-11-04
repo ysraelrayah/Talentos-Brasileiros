@@ -423,8 +423,9 @@ dialog.app-dialog p{color:#555;margin:0 0 22px}
 .eh .av{width:104px;height:104px;font-size:38px;border:2px solid #333}
 .eh-t{flex:1;min-width:240px}
 .eh-t h2{margin:0 0 6px}.eh-t p{margin:0 0 14px}
-.lk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
-.lk .url{font-size:13px;padding:7px 12px}
+ .lk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+ .lk .url{font-size:13px;padding:7px 12px}
+ .slug-change{display:flex;flex-direction:column;gap:7px;margin-top:14px;max-width:620px}.slug-change label{font-size:13px;font-weight:700;color:#fff}.slug-input{display:flex;align-items:center;gap:0;border:1px solid #444;border-radius:10px;overflow:hidden;background:#111}.slug-input span{padding:11px 0 11px 12px;color:#9b9b9b;font-size:13px;white-space:nowrap}.slug-input input{min-width:0;flex:1;padding:11px 8px;border:0;background:transparent;color:#fff;font:inherit;outline:0}.slug-input .btn{margin:4px;white-space:nowrap}.slug-change small{color:#999;font-size:12px}.slug-change [role=status]{color:#ffe431;font-size:13px}
 #lkOk{font-size:13px;color:var(--y)}
 .sh{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
 .sh h3{font-size:19px!important;text-transform:none!important;letter-spacing:0!important;color:#fff!important;margin:0 0 2px!important;font-weight:700!important}
@@ -700,6 +701,7 @@ body::before{background:var(--strip,#fff)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 var SB_URL='https://nomopjzfeuyvqjprniro.supabase.co',SB_KEY='sb_publishable_orI8mFE080k_xmRnI1RwGA_tEBY3d7v';
+var AUTH_REDIRECT=window.location.origin+'/area-do-atleta';
 var sb=null,ATL={},CUR=null,SLUG='';
 try{sb=supabase.createClient(SB_URL,SB_KEY)}catch(e){}
 var RES=['inicio','informacoes','painel','area-do-atleta'];
@@ -1007,7 +1009,7 @@ function editorHtml(a,wa,slug){
   var first=(a.nome||'').split(' ')[0],h='';
   h+='<div class="box ed eh"><div class="av" id="fotoPv">'+(FOTO?'<img src="'+FOTO+'" alt="Sua foto">':esc(iniciais(a.nome)))+'</div><div class="eh-t"><h2>'+(first?'Olá, '+esc(first)+'!':'Minha aba')+'</h2><p>Preencha o que souber, no seu ritmo. Nada muda na aba até você clicar em <b style="color:#fff">Salvar alterações</b>. A foto é a única exceção: ela é salva assim que você escolhe.</p>'
    +'<div class="row" style="justify-content:flex-start;gap:8px"><label class="btn o sm" style="cursor:pointer"><span id="fotoBt">'+(FOTO?'Trocar foto':'Adicionar foto')+'</span><input type="file" id="e_foto" class="sr" accept="image/*" onchange="pickFoto(this)"></label><button type="button" class="btn o sm" id="fotoRm" onclick="rmFoto()'+'"'+(FOTO?'':' hidden')+'>Remover foto</button><span id="fotoMsg" role="status"></span></div>'
-   +'<div class="lk"><span class="url">'+SITE+'/'+esc(slug)+'</span><button type="button" class="btn o sm" onclick="copiarLink(\''+esc(slug)+'\')">Copiar link</button></div></div></div>';
+   +'<div class="lk"><span class="url">'+SITE+'/'+esc(slug)+'</span><button type="button" class="btn o sm" onclick="copiarLink(\''+esc(slug)+'\')">Copiar link</button></div><div class="slug-change"><label for="e_slug">Seu link público</label><div class="slug-input"><span>'+SITE+'/</span><input id="e_slug" value="'+esc(slug)+'" maxlength="40" pattern="[a-z0-9-]+" autocomplete="off"><button type="button" class="btn o sm" onclick="alterarSlug(\''+esc(slug)+'\')">Trocar link</button></div><small>Use apenas letras minúsculas, números e hífen. O endereço precisa estar disponível.</small><span id="slugMsg" role="status"></span></div></div></div>';
   h+='<div class="ed-preview"><div class="ed-preview-head"><b>Prévia da sua aba</b><span>Atualiza enquanto você preenche os dados</span></div><div class="live-card" id="liveCard"><div class="live-card-head"><div class="live-avatar" id="liveAvatar"></div><div><h3 id="liveName"></h3><div class="live-tags" id="liveTags"></div></div></div><p id="liveBio"></p><div class="live-video"><i></i>Vídeo principal</div></div></div>';
   h+='<div class="box ed">'+sh(1,'Sobre você','O que o olheiro vê primeiro na sua aba.')+'<div class="fm s">'
    +inp2('e_nome','Nome',a.nome,{w:1,ph:'Como você quer aparecer'})+inp2('e_idade','Idade',a.idade,{type:'number',ph:'16'})+inp2('e_posicao','Posição',a.posicao,{list:'dl_pos',ph:'Ex: Meia'})+inp2('e_categoria','Categoria',a.categoria,{list:'dl_cat',ph:'Ex: Sub-17'})+inp2('e_cidade','Cidade, UF',a.cidade,{ph:'Ex: Fortaleza, CE'})+inp2('e_clube','Clube',a.clube,{ph:'Deixe vazio se estiver sem clube'})
@@ -1038,6 +1040,22 @@ async function openEditor(slug,boxId){
   if(!r.data){el.innerHTML=msg('Aba não encontrada.');return}
   el.innerHTML=editorHtml(fromRow(r.data),c.data?c.data.whatsapp:'',slug)+'<div class="savebar"><button class="btn y" onclick="salvarEd(\''+slug+'\')">Salvar alterações</button><a class="btn o" href="/'+slug+'" target="_blank" rel="noopener">Ver minha aba</a><span id="edOk" role="status"></span></div>';
   syncPv();
+}
+async function alterarSlug(oldSlug){
+  var input=$('e_slug'),out=$('slugMsg'),next=(input&&input.value||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  if(!next||next.length<3){out.textContent='O link precisa ter pelo menos 3 caracteres.';return}
+  if(next===oldSlug){out.textContent='Informe um link diferente.';return}
+  out.textContent='Verificando disponibilidade…';
+  var exists=await sb.from('athletes').select('slug').eq('slug',next).maybeSingle();
+  if(exists.error||exists.data){out.textContent=exists.data?'Este link já está em uso.':'Não foi possível verificar agora.';return}
+  if(!confirm('Trocar o link para '+SITE+'/'+next+'? O endereço antigo deixará de funcionar.'))return;
+  var updated=await sb.from('athletes').update({slug:next,updated_at:new Date().toISOString()}).eq('slug',oldSlug).select('slug');
+  if(updated.error||!(updated.data&&updated.data.length)){out.textContent='Não foi possível trocar o link. Tente novamente.';return}
+  var access=await sb.from('athlete_access').update({slug:next}).eq('slug',oldSlug);
+  var contacts=await sb.from('athlete_contacts').update({slug:next}).eq('slug',oldSlug);
+  var subs=await sb.from('athlete_subscriptions').update({slug:next}).eq('slug',oldSlug);
+  if(access.error||contacts.error||subs.error){out.textContent='O link foi alterado, mas os acessos relacionados precisam ser atualizados pelo administrador.';return}
+  EDSLUG=next;out.textContent='Link atualizado!';history.replaceState(null,'','#area-do-atleta');setTimeout(function(){openEditor(next,'edBox');refreshNav()},500);
 }
 async function salvarEd(slug){
   var g=function(i){return $(i).value.trim()},ok=$('edOk');
@@ -1110,7 +1128,7 @@ async function entrar(cb){
   if(r.error){LF++;if(LF>=5)LT=Date.now()+30000*Math.min(LF-4,6);$('pOk').textContent='E-mail ou senha incorretos.';return}
   LF=0;await window[cb]();boasVindas(r.data.user);
 }
-async function entrarGoogle(){if(!sb){$('pOk').textContent='O login não está disponível agora.';return}sessionStorage.setItem('tb_google_login','1');var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+'/area-do-atleta'}});if(r.error){sessionStorage.removeItem('tb_google_login');$('pOk').textContent='Não foi possível iniciar o login com Google. Tente novamente.'}}
+async function entrarGoogle(){if(!sb){$('pOk').textContent='O login não está disponível agora.';return}sessionStorage.setItem('tb_google_login','1');var redirect=window.location.origin+'/area-do-atleta';var r=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:redirect,queryParams:{access_type:'offline',prompt:'select_account'}}});if(r.error){sessionStorage.removeItem('tb_google_login');console.warn('[v0] Google OAuth:',r.error.message);$('pOk').textContent='Não foi possível iniciar o login com Google. Verifique se o Google está habilitado e tente novamente.'}}
 async function criarConta(){
   var e=$('lg_e').value.trim(),p=$('lg_p').value;
   if(!e||p.length<8){$('pOk').textContent='Informe o e-mail e uma senha com no mínimo 8 caracteres.';return}
@@ -1121,7 +1139,7 @@ async function criarConta(){
 async function esqueci(){
   var e=$('lg_e').value.trim();if(!e){$('pOk').textContent='Digite seu e-mail e clique de novo.';return}
   if(cool())return;
-  var r=await sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+'/area-do-atleta'});
+  var r=await sb.auth.resetPasswordForEmail(e,{redirectTo:AUTH_REDIRECT});
   if(r.error)console.warn(r.error.message);$('pOk').textContent='Se esse e-mail tiver conta, enviamos o link para criar uma nova senha.';
 }
 async function novaSenha(){
